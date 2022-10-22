@@ -1,0 +1,48 @@
+version: '3.1'
+
+services:
+  php:
+    image: php:apache
+    ports:
+      - 9090:80
+    volumes:
+      - ./webdocker:/var/www/html
+    links:
+      - mysql
+    networks:
+      - default
+    container_name: server_php
+    command: "/bin/sh -c 'docker-php-ext-install mysqli && exec apache2-foreground'"
+  mysql:
+    image: mysql:5.7
+    container_name: DB_mysql
+    ports:
+     - "3306:3306"
+    command: "--default-authentication-plugin=mysql_native_password"
+    environment:
+      MYSQL_DATABASE: DB
+      MYSQL_ROOT_PASSWORD: 12345
+    volumes:
+      - ./webdocker/database:/etc/mysql/conf.d
+      - persistent:/var/lib/mysql
+    networks:
+      - default
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin_1
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: 12345
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: 12345
+    links:
+      - mysql:DB
+    ports:
+      - 8080:80
+    volumes:
+      - ./webdocker/phpmyadmin/sessions:/sessions
+    networks:
+      - default
+volumes:
+  persistent:
