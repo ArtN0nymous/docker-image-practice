@@ -13,8 +13,8 @@ jobs:
    - name: Login Dockerhub #Nombre del paso
      uses: docker/login-action@v1 #indicamos que usaremos el action de dockerhub para iniciar sesion
      with:
-      username: ${{ secrets.DOCKERHUB_USER }} #Iniciaremos sesion en dockerhub con el secret de usuario para dockerhub 
-      password: ${{ secrets.DOCKERHUB_PASSWORD }} #Iniciaremos sesion en dockerhub con el secret de password para docjerhub
+      username: ${{ secrets.DOCKER_USER }} #Iniciaremos sesion en dockerhub con el secret de usuario para dockerhub 
+      password: ${{ secrets.DOCKER_HUB_TOKEN }} #Iniciaremos sesion en dockerhub con el secret de password para docjerhub
 
    - name: Descargar imagen
      run: docker pull ramsus/test1 #Hacemos un pull de la imagen de Dockerhub
@@ -22,13 +22,9 @@ jobs:
    - name: Cambiar nombre de la imagen
      run: docker tag ramsus/${{ github.event.inputs.image_name }} registry.gitlab.com/practica-docker/practica-docker/${{ github.event.inputs.image_name }}
      
-   - name: Login Gitlab
-     uses: docker/login-action@v1 #indicamos que usaremos el action de dockerhub para iniciar sesion
-     with:
-      username: ${{ secrets.GITLAB_USER }} #Iniciaremos sesion en Gitlab con el secret de usuario para Gitlab
-      password: ${{ secrets.GITLAB_PASSWORD }} #Iniciaremos sesion en Gitlab con el secret de password para Gitlab
-      registry: registry.gitlab.com
-   
-   - name: Push Image
-     run: docker push registry.gitlab.com/practica-docker/practica-docker/${{ github.event.inputs.image_name }}
+   - uses: docker/login-action@v1 #indicamos que usaremos el action de dockerhub para iniciar sesion
+   - name: push image
+     run: |
+        docker build . --file Dockerfile --tag docker.io/${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:$GITHUB_SHA
+        docker push docker.io/${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:$GITHUB_SHA
      
