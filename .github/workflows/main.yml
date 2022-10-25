@@ -1,4 +1,4 @@
-ame: Practica_docker #Nombre del workflow
+name: Practica_docker #Nombre del workflow
 
 on:
  workflow_dispatch: #Activa el workflow solo cuando nosotros le indiquemos manualmente
