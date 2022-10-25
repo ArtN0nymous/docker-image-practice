@@ -1,21 +1,34 @@
-name: Docker Image CI
+ame: Practica_docker #Nombre del workflow
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
+ workflow_dispatch: #Activa el workflow solo cuando nosotros le indiquemos manualmente
+  inputs: #Nos pide el nombre de la imagen
+   image_name:
+    description: nombre de la imagen
+    required: true
 jobs:
+ practica_docker:
+  runs-on: ubuntu-latest #indicamos en que SO correra
+  steps: #definimos los pisos que tiene
+   - name: Login Dockerhub #Nombre del paso
+     uses: docker/login-action@v1 #indicamos que usaremos el action de dockerhub para iniciar sesion
+     with:
+      username: ${{ secrets.DOCKERHUB_USER }} #Iniciaremos sesion en dockerhub con el secret de usuario para dockerhub 
+      password: ${{ secrets.DOCKERHUB_PASSWORD }} #Iniciaremos sesion en dockerhub con el secret de password para docjerhub
 
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: |
-        echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin docker.io
-        docker build . --file Dockerfile --tag docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:$GITHUB_SHA
-        docker push docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:$GITHUB_SHA
+   - name: Descargar imagen
+     run: docker pull ramsus/test1 #Hacemos un pull de la imagen de Dockerhub
+   
+   - name: Cambiar nombre de la imagen
+     run: docker tag ramsus/${{ github.event.inputs.image_name }} registry.gitlab.com/practica-docker/practica-docker/${{ github.event.inputs.image_name }}
+     
+   - name: Login Gitlab
+     uses: docker/login-action@v1 #indicamos que usaremos el action de dockerhub para iniciar sesion
+     with:
+      username: ${{ secrets.GITLAB_USER }} #Iniciaremos sesion en Gitlab con el secret de usuario para Gitlab
+      password: ${{ secrets.GITLAB_PASSWORD }} #Iniciaremos sesion en Gitlab con el secret de password para Gitlab
+      registry: registry.gitlab.com
+   
+   - name: Push Image
+     run: docker push registry.gitlab.com/practica-docker/practica-docker/${{ github.event.inputs.image_name }}
+     
