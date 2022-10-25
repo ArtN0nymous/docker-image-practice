@@ -22,7 +22,7 @@ jobs:
    - name: Cambiar nombre de la imagen
      run: docker tag ramsus/${{ github.event.inputs.image_name }} registry.gitlab.com/practica-docker/practica-docker/${{ github.event.inputs.image_name }}
      
-   - uses: docker/login-action@v1 #indicamos que usaremos el action de dockerhub para iniciar sesion
+   - uses: actions/checkout@v2 #indicamos que usaremos el action de dockerhub para iniciar sesion
    - name: push image
      run: |
         docker build . --file Dockerfile --tag docker.io/${{ secrets.DOCKER_USER }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:$GITHUB_SHA
